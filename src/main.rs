@@ -1,20 +1,16 @@
 mod command;
 mod drop_zeroed;
-mod input;
 mod error;
+mod input;
 mod password_bank;
 
 use command::run_command;
 use error::{Error, Result};
-use libc::c_char;
-use password_bank::{query_password_entry};
+use password_bank::PasswordBank;
 
 use crate::{drop_zeroed::DropZeroed, input::ask_for_password};
 
 fn try_main() -> Result<i32> {
-
-    let mut buf: [c_char; 2048] = [0; 2048];
-
     let mut args = argv::iter().peekable();
     let no_args_passed = args.peek().is_none();
 
@@ -22,11 +18,17 @@ fn try_main() -> Result<i32> {
         return Err(Error::NoCommandToRun);
     }
 
-    let pw_entry = query_password_entry(&mut buf)?;
+    let mut pw_entry = PasswordBank::query_password_entry()?;
+    if pw_entry.password_is_one_char() {
+        // When the password is one-char long (typically 'x'), that means that the actual
+        // encrypted password is located in `/etc/shadow` instead of `/etc/passwd`.
+        // username.write(pw_entry.username());
+        pw_entry = PasswordBank::query_shadow_file_by_username(pw_entry.username_ptr())?;
+    }
 
-    dbg!(pw_entry.password_bytes());
+    let password = ask_for_password(pw_entry.username_utf8())?;
 
-    let password = ask_for_password(pw_entry.username())?;
+    // Zeroes the password in-memory and drops it
     password.drop_zeroed();
 
     let status = run_command(argv::iter().skip(1))?;

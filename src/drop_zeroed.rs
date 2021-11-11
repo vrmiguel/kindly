@@ -16,7 +16,6 @@ impl DropZeroed for Vec<u8> {
     }
 }
 
-
 impl DropZeroed for String {
     fn drop_zeroed(self) {
         self.into_bytes().drop_zeroed();

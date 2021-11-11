@@ -6,8 +6,10 @@ pub enum Error {
     NoCommandToRun,
     #[error("IO error: {0}")]
     Io(#[from] io::Error),
-    #[error("Failed to obtain username")]
-    UnknownUsername,
+    #[error("Failed to query password bank")]
+    PasswordBank,
+    #[error("Failed to query shadow file")]
+    ShadowFile,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
