@@ -5,7 +5,7 @@ mod error;
 use command::run_command;
 use error::Result;
 
-fn try_main() -> Result<i32>{
+fn try_main() -> Result<i32> {
     let status = run_command(argv::iter().skip(1))?;
 
     if !status.is_ok() {
