@@ -9,11 +9,29 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9fec65789d8c87d48232b6f988ca269e2729ee9f878ffe0631b82b5695ab8d9"
 
 [[package]]
+name = "cfg-if"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "getrandom"
+version = "0.1.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8fc3cb4d91f53b50155bdcfd23f6a4c39ae1969c2ae85982b135750cccaf5fce"
+dependencies = [
+ "cfg-if",
+ "libc",
+ "wasi",
+]
+
+[[package]]
 name = "kindly"
 version = "0.1.0"
 dependencies = [
  "argv",
  "libc",
+ "memsec",
  "rpassword",
  "thiserror",
  "unixstring",
@@ -24,6 +42,17 @@ name = "libc"
 version = "0.2.107"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbe5e23404da5b4f555ef85ebed98fb4083e55a00c317800bc2a50ede9f3d219"
+
+[[package]]
+name = "memsec"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2af4f95d8737f4ffafbd1fb3c703cdc898868a244a59786793cba0520ebdcbdd"
+dependencies = [
+ "getrandom",
+ "libc",
+ "winapi",
+]
 
 [[package]]
 name = "proc-macro2"
@@ -98,6 +127,12 @@ checksum = "d3a1bde53d3a7210b30ebd12b63731378552b1347aa461b30f0328911b041324"
 dependencies = [
  "libc",
 ]
+
+[[package]]
+name = "wasi"
+version = "0.9.0+wasi-snapshot-preview1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
 name = "winapi"

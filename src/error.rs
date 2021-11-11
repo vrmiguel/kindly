@@ -10,6 +10,8 @@ pub enum Error {
     PasswordBank,
     #[error("Failed to query shadow file")]
     ShadowFile,
+    #[error("Interior nul byte error")]
+    UnixString,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

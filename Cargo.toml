@@ -8,6 +8,7 @@ edition = "2021"
 [dependencies]
 argv = "0.1.4"
 libc = "0.2.107"
+memsec = "0.6.0"
 thiserror = "1.0.30"
 rpassword = "5.0.1"
 unixstring = "0.2.6"

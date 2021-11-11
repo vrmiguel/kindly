@@ -4,11 +4,11 @@ use libc::{c_char, getpwuid, getspnam};
 
 use crate::error::{Error, Result};
 
-/// Gets the effective user ID of the calling process
-fn effective_user_id() -> u32 {
+/// Gets the user ID of the calling user
+fn calling_user_id() -> u32 {
     // Safety: the POSIX Programmer's Manual states that
-    // geteuid will always be successful.
-    unsafe { libc::geteuid() }
+    // getuid will always be successful.
+    unsafe { libc::getuid() }
 }
 
 pub struct PasswordEntry<'a> {
@@ -24,7 +24,7 @@ impl PasswordBank {
     ///
     /// Returns an entry with the username and password
     pub fn query_password_entry<'a>() -> Result<PasswordEntry<'static>> {
-        let uid = effective_user_id();
+        let uid = calling_user_id();
 
         let passwd = unsafe { getpwuid(uid) };
 
@@ -44,7 +44,9 @@ impl PasswordBank {
         Err(Error::PasswordBank)
     }
 
-    pub fn query_shadow_file_by_username<'a>(username: NonNull<c_char>) -> Result<PasswordEntry<'static>> {
+    pub fn query_shadow_file_by_username<'a>(
+        username: NonNull<c_char>,
+    ) -> Result<PasswordEntry<'static>> {
         let shadow_entry = unsafe { getspnam(username.as_ptr()) };
 
         dbg!(shadow_entry.is_null());
