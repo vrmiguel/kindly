@@ -12,7 +12,5 @@ pub fn encrypt(key: impl AsRef<CStr>, salt: impl AsRef<CStr>) -> UnixString {
 
     let encrypted_ptr = unsafe { crypt(key.as_ptr(), salt.as_ptr()) };
 
-    let encrypted = unsafe { UnixString::from_ptr(encrypted_ptr) };
-
-    encrypted
+    unsafe { UnixString::from_ptr(encrypted_ptr) }
 }

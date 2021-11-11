@@ -21,12 +21,13 @@ fn try_main() -> Result<i32> {
         return Err(Error::NoCommandToRun);
     }
 
+    // We'll query the password bank (/etc/passwd)
     let (uid, mut pw_entry) = PasswordBank::query_password_entry()?;
 
     if pw_entry.password_is_one_char() {
         // When the password is one-char long (typically 'x'), that means that the actual
         // encrypted password is located in `/etc/shadow` instead of `/etc/passwd`.
-        // username.write(pw_entry.username());
+
         pw_entry = PasswordBank::query_shadow_file_by_username(pw_entry.username_ptr())?;
     }
 
@@ -37,8 +38,8 @@ fn try_main() -> Result<i32> {
     // Zeroes the password in-memory and drops it
     password.drop_zeroed();
 
-    println!("encrypted: {}", encrypted.as_path().display());
-    println!("passwd->pwd: {}", pw_entry.password().to_string_lossy());
+    // println!("encrypted: {}", encrypted.as_path().display());
+    // println!("passwd->pwd: {}", pw_entry.password().to_string_lossy());
 
     let passwords_match = {
         // The user-supplied password that is now encrypted

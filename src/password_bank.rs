@@ -23,7 +23,7 @@ impl PasswordBank {
     /// Queries the password bank (/dev/passwd) through the effective user id of the caller.
     ///
     /// Returns an entry with the username and password
-    pub fn query_password_entry<'a>() -> Result<(u32, PasswordEntry<'static>)> {
+    pub fn query_password_entry() -> Result<(u32, PasswordEntry<'static>)> {
         let uid = calling_user_id();
 
         let passwd = unsafe { getpwuid(uid) };
@@ -45,12 +45,10 @@ impl PasswordBank {
         Err(Error::PasswordBank)
     }
 
-    pub fn query_shadow_file_by_username<'a>(
+    pub fn query_shadow_file_by_username(
         username: NonNull<c_char>,
     ) -> Result<PasswordEntry<'static>> {
         let shadow_entry = unsafe { getspnam(username.as_ptr()) };
-
-        dbg!(shadow_entry.is_null());
 
         if !shadow_entry.is_null() {
             // If getpwnam succeeded, let's get our data from it

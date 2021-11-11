@@ -17,7 +17,7 @@ impl<'a> VolatileBytes<'a> {
 
 impl AsRef<[u8]> for VolatileBytes<'_> {
     fn as_ref(&self) -> &[u8] {
-        &self.bytes
+        self.bytes
     }
 }
 
