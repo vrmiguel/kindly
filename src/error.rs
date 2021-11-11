@@ -13,7 +13,9 @@ pub enum Error {
     #[error("Interior nul byte error")]
     UnixString,
     #[error("Authentication failed")]
-    Authentication
+    Authentication,
+    #[error("Failed to set UID")]
+    Setuid,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

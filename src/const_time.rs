@@ -24,13 +24,14 @@ impl AsRef<[u8]> for VolatileBytes<'_> {
 impl PartialEq for VolatileBytes<'_> {
     fn eq(&self, other: &Self) -> bool {
         // TODO: slice length checking is O(1) so this likely cannot
-        // create a timing attack, but I need to investigate further to check that
+        // create a timing attack, but I need to investigate further to assure that
         if self.len() != other.len() {
+            dbg!("lengths differed");
             return false;
         }
 
         let length = self.len();
 
-        unsafe { memeq(self.as_ref().as_ptr(), other.as_ref().as_ptr(), length) }
+        dbg!(unsafe { memeq(self.as_ref().as_ptr(), other.as_ref().as_ptr(), length) })
     }
 }

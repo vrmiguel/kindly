@@ -23,7 +23,7 @@ impl PasswordBank {
     /// Queries the password bank (/dev/passwd) through the effective user id of the caller.
     ///
     /// Returns an entry with the username and password
-    pub fn query_password_entry<'a>() -> Result<PasswordEntry<'static>> {
+    pub fn query_password_entry<'a>() -> Result<(u32, PasswordEntry<'static>)> {
         let uid = calling_user_id();
 
         let passwd = unsafe { getpwuid(uid) };
@@ -31,14 +31,15 @@ impl PasswordBank {
         if !passwd.is_null() {
             // If getpwuid succeeded, let's get our data from it
 
-            // Safety: we just checked that `passwd` is not NUlL
+            // Safety: we just checked that `passwd` is not NULL
+            let uid = unsafe { (*passwd).pw_uid };
             let pw_name = unsafe { (*passwd).pw_name };
             let pw_passwd = unsafe { (*passwd).pw_passwd };
 
-            // let username = unsafe { CStr::from_ptr(pw_name) };
-            // let password = unsafe { CStr::from_ptr(pw_passwd) };
+            let password_entry =
+                PasswordEntry::from_ptrs(pw_name, pw_passwd).ok_or(Error::PasswordBank)?;
 
-            return PasswordEntry::from_ptrs(pw_name, pw_passwd).ok_or(Error::PasswordBank);
+            return Ok((uid, password_entry));
         }
 
         Err(Error::PasswordBank)

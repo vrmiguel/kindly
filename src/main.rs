@@ -8,7 +8,7 @@ mod password_bank;
 
 use command::run_command;
 use error::{Error, Result};
-use libc::setreuid;
+use libc::setuid;
 use password_bank::PasswordBank;
 
 use crate::{const_time::VolatileBytes, drop_zeroed::DropZeroed, input::ask_for_password};
@@ -21,7 +21,7 @@ fn try_main() -> Result<i32> {
         return Err(Error::NoCommandToRun);
     }
 
-    let mut pw_entry = PasswordBank::query_password_entry()?;
+    let (uid, mut pw_entry) = PasswordBank::query_password_entry()?;
 
     if pw_entry.password_is_one_char() {
         // When the password is one-char long (typically 'x'), that means that the actual
@@ -42,7 +42,7 @@ fn try_main() -> Result<i32> {
 
     let passwords_match = {
         // The user-supplied password that is now encrypted
-        let encrypted = VolatileBytes::new(encrypted.as_bytes_with_nul());
+        let encrypted = VolatileBytes::new(encrypted.as_bytes());
 
         // The encrypted password value found in the password bank or in the shadow file
         let password_from_entry = VolatileBytes::new(pw_entry.password_bytes());
@@ -50,6 +50,10 @@ fn try_main() -> Result<i32> {
         // We'll compare them through a "secure" `memeq` implementation
         encrypted == password_from_entry
     };
+
+    if unsafe { setuid(uid) } != 0 {
+        return Err(Error::Setuid);
+    }
 
     if !passwords_match {
         return Err(Error::Authentication);
@@ -59,7 +63,7 @@ fn try_main() -> Result<i32> {
 
     if !status.is_ok() {
         println!("[kindly] {}", status);
-    } 
+    }
 
     Ok(status.code_or_signal())
 }

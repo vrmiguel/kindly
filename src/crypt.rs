@@ -1,6 +1,6 @@
 use std::ffi::CStr;
 
-use libc::{c_char, free};
+use libc::c_char;
 use unixstring::UnixString;
 
 extern "C" {
