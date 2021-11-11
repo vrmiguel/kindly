@@ -7,7 +7,7 @@ pub enum Error {
     #[error("IO error: {0}")]
     Io(#[from] io::Error),
     #[error("Failed to obtain username")]
-    UnknownUsername
+    UnknownUsername,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

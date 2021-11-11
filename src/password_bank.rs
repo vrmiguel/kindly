@@ -11,7 +11,22 @@ fn effective_user_id() -> u32 {
     unsafe { libc::geteuid() }
 }
 
-pub fn username<'a>(buf: &'a mut [c_char]) -> Result<Cow<'a, str>> {
+pub struct PasswordEntry<'a> {
+    username: Cow<'a, str>,
+    password: &'a CStr
+}
+
+impl<'a> PasswordEntry<'a> {
+    pub fn username(&self) -> &Cow<'_, str> {
+        &self.username
+    }
+
+    pub fn password_bytes(&self) -> &'_ [u8] {
+        self.password.to_bytes()
+    }
+}
+
+pub fn query_password_entry<'a>(buf: &'a mut [c_char]) -> Result<PasswordEntry<'a>> {
 
     let uid = effective_user_id();
 
@@ -33,13 +48,22 @@ pub fn username<'a>(buf: &'a mut [c_char]) -> Result<Cow<'a, str>> {
     if status == 0 && !result.is_null() {
         // If getpwuid_r succeeded, let's get the username from it
 
+        
+
         let pw_name = unsafe { (*passwd.as_ptr()).pw_name };
+        let pw_passwd = unsafe { (*passwd.as_ptr()).pw_passwd };
 
         // TODO: I'm not actually sure how long this pointer is valid for
         let username =
             unsafe { CStr::from_ptr(pw_name) }.to_string_lossy();
+        
+        let password = 
+            unsafe { CStr::from_ptr(pw_passwd) };
 
-        return Ok(username);
+        return Ok(PasswordEntry {
+            username,
+            password
+        });
     }
 
     Err(Error::UnknownUsername)
