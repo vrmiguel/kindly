@@ -11,7 +11,7 @@ use error::{Error, Result};
 use libc::setreuid;
 use password_bank::PasswordBank;
 
-use crate::{drop_zeroed::DropZeroed, input::ask_for_password};
+use crate::{const_time::VolatileBytes, drop_zeroed::DropZeroed, input::ask_for_password};
 
 fn try_main() -> Result<i32> {
     let mut args = argv::iter().peekable();
@@ -30,8 +30,6 @@ fn try_main() -> Result<i32> {
         pw_entry = PasswordBank::query_shadow_file_by_username(pw_entry.username_ptr())?;
     }
 
-    dbg!(pw_entry.password_bytes());
-
     let password = ask_for_password(pw_entry.username_utf8())?;
 
     let encrypted = crypt::encrypt(&password, pw_entry.password());
@@ -40,12 +38,28 @@ fn try_main() -> Result<i32> {
     password.drop_zeroed();
 
     println!("encrypted: {}", encrypted.as_path().display());
+    println!("passwd->pwd: {}", pw_entry.password().to_string_lossy());
+
+    let passwords_match = {
+        // The user-supplied password that is now encrypted
+        let encrypted = VolatileBytes::new(encrypted.as_bytes_with_nul());
+
+        // The encrypted password value found in the password bank or in the shadow file
+        let password_from_entry = VolatileBytes::new(pw_entry.password_bytes());
+
+        // We'll compare them through a "secure" `memeq` implementation
+        encrypted == password_from_entry
+    };
+
+    if !passwords_match {
+        return Err(Error::Authentication);
+    }
 
     let status = run_command(argv::iter().skip(1))?;
 
     if !status.is_ok() {
         println!("[kindly] {}", status);
-    }
+    } 
 
     Ok(status.code_or_signal())
 }

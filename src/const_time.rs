@@ -1,6 +1,3 @@
-use std::{ffi::CStr, ops::Deref, ptr::NonNull};
-
-use libc::strlen;
 use memsec::memeq;
 
 pub struct VolatileBytes<'a> {

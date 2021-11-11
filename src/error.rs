@@ -12,6 +12,8 @@ pub enum Error {
     ShadowFile,
     #[error("Interior nul byte error")]
     UnixString,
+    #[error("Authentication failed")]
+    Authentication
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

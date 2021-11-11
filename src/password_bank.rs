@@ -56,7 +56,7 @@ impl PasswordBank {
 
             // Safety: we just checked that `passwd` is not NUlL
             let username = unsafe { (*shadow_entry).sp_namp };
-            let password = unsafe { (*shadow_entry).sp_namp };
+            let password = unsafe { (*shadow_entry).sp_pwdp };
 
             return PasswordEntry::from_ptrs(username, password).ok_or(Error::ShadowFile);
         }
