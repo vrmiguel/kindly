@@ -28,13 +28,16 @@ fn try_main() -> Result<i32> {
     // Locks all pages mapped into the address space of the calling process.
     lock_memory_pages()?;
 
-    // We'll query the password bank (/etc/passwd)
+    // We'll query the password bank (/etc/passwd) for the entry corresponding to the user
+    // that started `kindly`
     let (uid, mut pw_entry) = PasswordBank::query_password_entry()?;
 
     if pw_entry.password_is_one_char() {
         // When the password is one-char long (typically 'x'), that means that the actual
         // encrypted password is located in `/etc/shadow` instead of `/etc/passwd`.
 
+        // We'll query the shadow file by username in order to get the actual encrypted password of the user
+        // that started kindly
         pw_entry = PasswordBank::query_shadow_file_by_username(pw_entry.username_ptr())?;
     }
 
