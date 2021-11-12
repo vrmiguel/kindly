@@ -37,6 +37,6 @@ impl PartialEq for VolatileBytes<'_> {
 
         let length = self.len();
 
-        dbg!(unsafe { memeq(self.as_ref().as_ptr(), other.as_ref().as_ptr(), length) })
+        unsafe { memeq(self.as_ref().as_ptr(), other.as_ref().as_ptr(), length) }
     }
 }
