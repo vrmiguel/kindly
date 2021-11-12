@@ -3,12 +3,16 @@ mod const_time;
 mod crypt;
 mod drop_zeroed;
 mod error;
+mod errno;
 mod input;
+mod memory_lock;
 mod password_bank;
+
 
 use command::run_command;
 use error::{Error, Result};
 use libc::setuid;
+use memory_lock::lock_memory_pages;
 use password_bank::PasswordBank;
 
 use crate::{const_time::VolatileBytes, drop_zeroed::DropZeroed, input::ask_for_password};
@@ -20,6 +24,9 @@ fn try_main() -> Result<i32> {
     if no_args_passed {
         return Err(Error::NoCommandToRun);
     }
+
+    // Locks all pages mapped into the address space of the calling process.
+    lock_memory_pages()?;
 
     // We'll query the password bank (/etc/passwd)
     let (uid, mut pw_entry) = PasswordBank::query_password_entry()?;

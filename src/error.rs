@@ -16,6 +16,16 @@ pub enum Error {
     Authentication,
     #[error("Failed to set UID")]
     Setuid,
+    #[error("Some or all of the memory identified by mlockall could not be locked")]
+    CouldNotLockMemoryError,
+    #[error("The flags argument is zero, or includes unimplemented flags")]
+    InvalidFlagsError,
+    #[error("Could not lock the needed amount of memory")]
+    TooMuchMemoryToLockError,
+    #[error("Not enough permissions to lock the memory pages")]
+    NoPermission,
+    #[error("Some unknown (or impossible) mlockall error happened")]
+    UnknownMlockallError
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

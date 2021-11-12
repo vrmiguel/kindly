@@ -9,6 +9,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e9fec65789d8c87d48232b6f988ca269e2729ee9f878ffe0631b82b5695ab8d9"
 
 [[package]]
+name = "cc"
+version = "1.0.72"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "22a9137b95ea06864e018375b72adfb7db6e6f68cfc8df5a04d00288050485ee"
+
+[[package]]
 name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -30,6 +36,8 @@ name = "kindly"
 version = "0.1.0"
 dependencies = [
  "argv",
+ "cc",
+ "cfg-if",
  "libc",
  "memsec",
  "rpassword",
