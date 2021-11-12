@@ -43,7 +43,7 @@ fn try_main() -> Result<i32> {
     }
 
     // Asks for the user's password
-    let password = ask_for_password(pw_entry.username_utf8())?;
+    let password = ask_for_password(pw_entry.username_utf8()).ok_or(Error::PasswordAsking)?;
 
     // Encrypts the password in order to match the encrypted password entry in the password bank or shadow file
     let encrypted = crypt::encrypt(&password, pw_entry.password());

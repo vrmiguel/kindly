@@ -36,8 +36,6 @@ pub fn _mlockall_wrapper(flags: c_int) -> Result<()> {
 
 /// Locks all pages mapped into the address space of the calling process.
 pub fn lock_memory_pages() -> Result<()> {
-    // TODO: check for _MCL_ONFAULT == -1
-
     #[allow(non_snake_case)]
     let MCL_ONFAULT: c_int = unsafe { _MCL_ONFAULT };
     match _mlockall_wrapper(MCL_CURRENT | MCL_FUTURE | MCL_ONFAULT) {

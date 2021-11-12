@@ -10,8 +10,8 @@ pub enum Error {
     PasswordBank,
     #[error("Failed to query shadow file")]
     ShadowFile,
-    #[error("Interior nul byte error")]
-    UnixString,
+    #[error("Failed to ask for password")]
+    PasswordAsking,
     #[error("Authentication failed")]
     Authentication,
     #[error("Failed to set UID")]

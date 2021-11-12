@@ -1,14 +1,25 @@
 use unixstring::UnixString;
 
-use crate::error::{Error, Result};
+use crate::drop_zeroed::DropZeroed;
 
 /// Safely reads the password from a terminal
-pub fn ask_for_password(username: impl AsRef<str>) -> Result<UnixString> {
+pub fn ask_for_password(username: impl AsRef<str>) -> Option<UnixString> {
     println!("[kindly] Password for {}:", username.as_ref());
 
-    let password = rpassword::read_password_from_tty(None)?;
+    let password = rpassword::read_password_from_tty(None).ok()?;
 
-    let password = UnixString::try_from(password).map_err(|_| Error::UnixString)?;
+    // As pointed out by @ferrouille, we must not use `UnixString::try_from` to convert here
+    // since it could lead to a copy of the password being left unzeroed somewhere in the memory.
+    let mut unx = UnixString::with_capacity(password.len());
 
-    Ok(password)
+    let push_worked = unx.push_bytes(password.as_bytes()).is_ok();
+
+    password.drop_zeroed();
+    
+    if push_worked {
+        Some(unx)
+    } else {
+        unx.drop_zeroed();
+        None
+    }
 }
