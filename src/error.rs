@@ -25,7 +25,7 @@ pub enum Error {
     #[error("Not enough permissions to lock the memory pages")]
     NoPermission,
     #[error("Some unknown (or impossible) mlockall error happened")]
-    UnknownMlockallError
+    UnknownMlockallError,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;

@@ -11,6 +11,12 @@ fn calling_user_id() -> u32 {
     unsafe { libc::getuid() }
 }
 
+pub fn effective_user_id() -> u32 {
+    // Safety: the POSIX Programmer's Manual states that
+    // geteuid will always be successful.
+    unsafe { libc::geteuid() }
+}
+
 /// A reduced view of an entry in the password bank or in the shadow file
 pub struct PasswordEntry<'a> {
     username: NonNull<c_char>,

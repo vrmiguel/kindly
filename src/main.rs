@@ -2,28 +2,29 @@ mod command;
 mod const_time;
 mod crypt;
 mod drop_zeroed;
-mod error;
 mod errno;
+mod error;
 mod input;
 mod memory_lock;
 mod password_bank;
-
 
 use command::run_command;
 use error::{Error, Result};
 use libc::setuid;
 use memory_lock::lock_memory_pages;
-use password_bank::PasswordBank;
+use password_bank::{effective_user_id, PasswordBank};
 
 use crate::{const_time::VolatileBytes, drop_zeroed::DropZeroed, input::ask_for_password};
 
 fn try_main() -> Result<i32> {
-    let mut args = argv::iter().peekable();
+    let mut args = argv::iter().skip(1).peekable();
     let no_args_passed = args.peek().is_none();
 
     if no_args_passed {
         return Err(Error::NoCommandToRun);
     }
+
+    let effective_user_id = effective_user_id();
 
     // Locks all pages mapped into the address space of the calling process.
     lock_memory_pages()?;
@@ -66,14 +67,19 @@ fn try_main() -> Result<i32> {
         return Err(Error::Authentication);
     }
 
-    // Elevate the privileges of the calling user
-    if unsafe { setuid(uid) } != 0 {
+    // Elevate the privileges of the running process
+    if unsafe { setuid(effective_user_id) } != 0 {
         return Err(Error::Setuid);
     }
 
     // Runs the command given through command-line arguments and waits
     // for it to exit
-    let status = run_command(argv::iter().skip(1))?;
+    let status = run_command(args)?;
+
+    // Deescalate the privileges of the running process
+    if unsafe { setuid(uid) } != 0 {
+        return Err(Error::Setuid);
+    }
 
     if !status.is_ok() {
         // The spawned process was signaled or terminated normally with a non-zero exit code
