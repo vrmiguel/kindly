@@ -11,12 +11,14 @@ fn calling_user_id() -> u32 {
     unsafe { libc::getuid() }
 }
 
+/// A reduced view of an entry in the password bank or in the shadow file
 pub struct PasswordEntry<'a> {
     username: NonNull<c_char>,
     password: NonNull<c_char>,
     spook: PhantomData<&'a c_char>,
 }
 
+/// Abstracts over access to the password bank or to the shadow file
 pub struct PasswordBank;
 
 impl PasswordBank {
@@ -65,6 +67,7 @@ impl PasswordBank {
 }
 
 impl<'a> PasswordEntry<'a> {
+    /// Instantiates a [`PasswordEntry`] from the raw pointers representing the username and the password
     pub fn from_ptrs(username: *const c_char, password: *const c_char) -> Option<Self> {
         Some(Self {
             username: NonNull::new(username as *mut _)?,
@@ -73,26 +76,32 @@ impl<'a> PasswordEntry<'a> {
         })
     }
 
+    /// Returns the raw pointer of the username of this entry
     pub fn username_ptr(&self) -> NonNull<c_char> {
         self.username
     }
 
+    /// Returns the username of this entry as a [`CStr`]
     pub fn username(&self) -> &'_ CStr {
         unsafe { CStr::from_ptr(self.username.as_ptr()) }
     }
 
+    /// Returns the username of this entry in valid UTF-8
     pub fn username_utf8(&self) -> Cow<'_, str> {
         self.username().to_string_lossy()
     }
 
+    /// Returns the password of this entry as a [`CStr`]
     pub fn password(&self) -> &'_ CStr {
         unsafe { CStr::from_ptr(self.password.as_ptr()) }
     }
 
+    /// Returns a byte slice of the password of this entry
     pub fn password_bytes(&self) -> &'_ [u8] {
         self.password().to_bytes()
     }
 
+    /// Returns true if the password is one char in length
     pub fn password_is_one_char(&self) -> bool {
         self.password_bytes().len() == 1
     }

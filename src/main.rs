@@ -31,15 +31,14 @@ fn try_main() -> Result<i32> {
         pw_entry = PasswordBank::query_shadow_file_by_username(pw_entry.username_ptr())?;
     }
 
+    // Asks for the user's password
     let password = ask_for_password(pw_entry.username_utf8())?;
 
+    // Encrypts the password in order to match the encrypted password entry in the password bank or shadow file
     let encrypted = crypt::encrypt(&password, pw_entry.password());
 
     // Zeroes the password in-memory and drops it
     password.drop_zeroed();
-
-    // println!("encrypted: {}", encrypted.as_path().display());
-    // println!("passwd->pwd: {}", pw_entry.password().to_string_lossy());
 
     let passwords_match = {
         // The user-supplied password that is now encrypted
@@ -52,17 +51,22 @@ fn try_main() -> Result<i32> {
         encrypted == password_from_entry
     };
 
-    if unsafe { setuid(uid) } != 0 {
-        return Err(Error::Setuid);
-    }
-
+    // The supplied password is not correct!
     if !passwords_match {
         return Err(Error::Authentication);
     }
 
+    // Elevate the privileges of the calling user
+    if unsafe { setuid(uid) } != 0 {
+        return Err(Error::Setuid);
+    }
+
+    // Runs the command given through command-line arguments and waits
+    // for it to exit
     let status = run_command(argv::iter().skip(1))?;
 
     if !status.is_ok() {
+        // The spawned process was signaled or terminated normally with a non-zero exit code
         println!("[kindly] {}", status);
     }
 
