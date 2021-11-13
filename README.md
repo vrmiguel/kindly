@@ -9,6 +9,6 @@
 git clone https://github.com/vrmiguel/kindly
 cd kindly && cargo build --release
 
-# We know need to make `kindly` officially a set-user-ID-root program by enabling the set-user-ID bit for it
+# We now need to make `kindly` officially a set-user-ID-root program by enabling the set-user-ID bit for it
 sudo chown root:root target/release/kindly && sudo chmod u+s target/release/kindly
 ```
