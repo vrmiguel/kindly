@@ -29,8 +29,7 @@ impl AsRef<[u8]> for VolatileBytes<'_> {
 
 impl PartialEq for VolatileBytes<'_> {
     fn eq(&self, other: &Self) -> bool {
-        // TODO: slice length checking is O(1) so this likely cannot
-        // create a timing attack, but I need to investigate further in order to assure that
+        // Length comparison is constant-time since slice lengths are stored in metadata
         if self.len() != other.len() {
             return false;
         }
